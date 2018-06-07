@@ -1,5 +1,8 @@
+import gym
 import torch
+import numpy as np
 import torch.nn as nn
+from gym.spaces.box import Box
 
 
 # Necessary for my KFAC implementation.
@@ -27,3 +30,19 @@ def init(module, weight_init, bias_init, gain=1):
 def init_normc_(weight, gain=1):
     weight.normal_(0, 1)
     weight *= gain / torch.sqrt(weight.pow(2).sum(1, keepdim=True))
+
+
+class WrapPyTorch(gym.ObservationWrapper):
+    def __init__(self, env=None):
+        super(WrapPyTorch, self).__init__(env)
+        obs_shape = self.observation_space.shape
+        self.observation_space = Box(
+            self.observation_space.low[0,0,0],
+            self.observation_space.high[0,0,0],
+            [obs_shape[2], obs_shape[1], obs_shape[0]]
+        )
+
+    def observation(self, observation):
+        # TODO: Check this workaround
+        observation = np.squeeze(np.array(observation._frames))
+        return observation

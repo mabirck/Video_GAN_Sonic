@@ -64,9 +64,9 @@ class Policy(nn.Module):
         return value, action_log_probs, dist_entropy, states
 
 
-class CNN_D(nn.Module):
+class discriminator(nn.Module):
     def __init__(self, num_inputs):
-        super(CNN_D, self).__init__()
+        super(discriminator, self).__init__()
 
         init_ = lambda m: init(m,
                       nn.init.orthogonal_,
@@ -82,13 +82,53 @@ class CNN_D(nn.Module):
             nn.ReLU(),
             Flatten(),
             init_(nn.Linear(32 * 7 * 7, 2)),
-            nn.Softmax()
+            nn.Softmax(dim=-1)
         )
 
         self.train()
 
     def forward(self, inputs):
         x = self.main(inputs / 255.0)
+        return x
+
+class generator(nn.Module):
+    # Network Architecture is exactly same as in infoGAN (https://arxiv.org/abs/1606.03657)
+    # Architecture : FC1024_BR-FC7x7x128_BR-(64)4dc2s_BR-(1)4dc2s_S
+    def __init__(self, dataset = 'mnist'):
+        super(generator, self).__init__()
+        if dataset == 'mnist' or dataset == 'fashion-mnist':
+            self.input_height = 28
+            self.input_width = 28
+            self.input_dim = 62
+            self.output_dim = 1
+        elif dataset == 'celebA':
+            self.input_height = 64
+            self.input_width = 64
+            self.input_dim = 62
+            self.output_dim = 3
+
+        self.fc = nn.Sequential(
+            nn.Linear(self.input_dim, 1024),
+            nn.BatchNorm1d(1024),
+            nn.ReLU(),
+            nn.Linear(1024, 128 * (self.input_height // 4) * (self.input_width // 4)),
+            nn.BatchNorm1d(128 * (self.input_height // 4) * (self.input_width // 4)),
+            nn.ReLU(),
+        )
+        self.deconv = nn.Sequential(
+            nn.ConvTranspose2d(128, 64, 4, 2, 1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            nn.ConvTranspose2d(64, self.output_dim, 4, 2, 1),
+            nn.Sigmoid(),
+        )
+        utils.initialize_weights(self)
+
+    def forward(self, input):
+        x = self.fc(input)
+        x = x.view(-1, 128, (self.input_height // 4), (self.input_width // 4))
+        x = self.deconv(x)
+
         return x
 
 
