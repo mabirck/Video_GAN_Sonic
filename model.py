@@ -1,4 +1,5 @@
 import torch
+import utils
 import torch.nn as nn
 import torch.nn.functional as F
 from distributions import Categorical, DiagGaussian
@@ -88,6 +89,7 @@ class discriminator(nn.Module):
         self.train()
 
     def forward(self, inputs):
+        print("HEYOW", inputs.size())
         x = self.main(inputs / 255.0)
         return x
 
@@ -97,8 +99,8 @@ class generator(nn.Module):
     def __init__(self, dataset = 'mnist'):
         super(generator, self).__init__()
         if dataset == 'mnist' or dataset == 'fashion-mnist':
-            self.input_height = 28
-            self.input_width = 28
+            self.input_height = 84
+            self.input_width = 84
             self.input_dim = 62
             self.output_dim = 1
         elif dataset == 'celebA':
@@ -128,7 +130,6 @@ class generator(nn.Module):
         x = self.fc(input)
         x = x.view(-1, 128, (self.input_height // 4), (self.input_width // 4))
         x = self.deconv(x)
-
         return x
 
 

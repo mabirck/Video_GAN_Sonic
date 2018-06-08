@@ -31,6 +31,17 @@ def init_normc_(weight, gain=1):
     weight.normal_(0, 1)
     weight *= gain / torch.sqrt(weight.pow(2).sum(1, keepdim=True))
 
+def initialize_weights(net):
+    for m in net.modules():
+        if isinstance(m, nn.Conv2d):
+            m.weight.data.normal_(0, 0.02)
+            m.bias.data.zero_()
+        elif isinstance(m, nn.ConvTranspose2d):
+            m.weight.data.normal_(0, 0.02)
+            m.bias.data.zero_()
+        elif isinstance(m, nn.Linear):
+            m.weight.data.normal_(0, 0.02)
+            m.bias.data.zero_()
 
 class WrapPyTorch(gym.ObservationWrapper):
     def __init__(self, env=None):
