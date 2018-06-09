@@ -52,7 +52,6 @@ def train_GAN(tranfer_GAN, envs, replay_buffer, args):
             actions = envs.action_space.sample()
             obs, rewards, dones, info = envs.step([actions])
             replay_buffer.append(obs)
-            print(len(replay_buffer.samples))
             # __________________________________________________#
 
             # Train discriminator with real data #
@@ -96,7 +95,7 @@ def train_GAN(tranfer_GAN, envs, replay_buffer, args):
             # _________________________________________________#
 
             print('Epoch [%d/%d], Step [%d/%d], D_loss: %.4f, G_loss: %.4f'
-                   % (epoch+1, args.gan_num_epochs, step+1, len(replay_buffer.samples), D_loss.data[0], G_loss.data[0]))
+                   % (epoch+1, args.gan_num_epochs, step+1, args.gan_num_steps, D_loss.data[0], G_loss.data[0]))
 
         D_avg_loss = torch.mean(torch.FloatTensor(D_losses))
         G_avg_loss = torch.mean(torch.FloatTensor(G_losses))

@@ -89,7 +89,6 @@ class discriminator(nn.Module):
         self.train()
 
     def forward(self, inputs):
-        print("HEYOW", inputs.size())
         x = self.main(inputs / 255.0)
         return x
 
