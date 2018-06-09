@@ -12,6 +12,8 @@ def get_args():
                         help='Buffer Size to train GAN')
     parser.add_argument('--gan_num_epochs', type=int, default=100,
                         help='Epochs to train GAN')
+    parser.add_argument('--gan_num_steps', type=int, default=int(1e4),
+                            help='Steps por epoch in GAN')
     parser.add_argument('--noise_inputs', type=int, default=62,
                         help='Noise inputs into generative model')
     parser.add_argument('--burn_in_frames', type=int, default=int(100),

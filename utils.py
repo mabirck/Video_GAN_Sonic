@@ -124,3 +124,8 @@ def plot_result(generator, noise, num_epoch, save=False, save_dir='CelebA_DCGAN_
         plt.show()
     else:
         plt.close()
+
+# De-normalization
+def denorm(x):
+    out = (x + 1) / 2
+    return out.clamp(0, 1)
