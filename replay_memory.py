@@ -8,7 +8,8 @@ class Sample(object):
         # TODO: Check what are the effects of this
         #utils.assert_eq(type(state), type(next_state))
 
-        self._state = (state * 255.0).astype(np.uint8)
+        #self._state = (state * 255.0).astype(np.uint8)
+        self._state = np.array(state).astype(np.uint8)
 
     @property
     def state(self):
@@ -58,14 +59,16 @@ class ReplayMemory(object):
                 print('%d frames burned in' % i)
         print('%d frames burned into the memory.' % i)
 
-    def append(self, state):
+    def append(self, states):
         assert len(self.samples) <= self.max_size
-        new_sample = Sample(state)
-        if len(self.samples) == self.max_size:
-            avail_slot = self._evict()
-            self.samples[avail_slot] = new_sample
-        else:
-            self.samples.append(new_sample)
+        new_samples = [Sample(state) for state in states]
+
+        for new_sample in new_samples:
+            if len(self.samples) == self.max_size:
+                avail_slot = self._evict()
+                self.samples[avail_slot] = new_sample
+            else:
+                self.samples.append(new_sample)
 
     def sample(self, batch_size):
         """Simpliest uniform sampling (w/o replacement) to produce a batch.

@@ -51,8 +51,7 @@ def train_GAN(tranfer_GAN, envs, replay_buffer, args):
             envs.render()
             actions = envs.action_space.sample()
             obs, rewards, dones, info = envs.step([actions])
-            print(obs.shape)
-            replay_buffer.append(obs.squeeze(0))
+            replay_buffer.append(obs)
             print(len(replay_buffer.samples))
             # __________________________________________________#
 
