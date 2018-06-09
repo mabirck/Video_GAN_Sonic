@@ -68,7 +68,7 @@ class Policy(nn.Module):
 class discriminator(nn.Module):
     def __init__(self, num_inputs):
         super(discriminator, self).__init__()
-
+        self.output_dim = 1
         init_ = lambda m: init(m,
                       nn.init.orthogonal_,
                       lambda x: nn.init.constant_(x, 0),
@@ -82,8 +82,8 @@ class discriminator(nn.Module):
             init_(nn.Conv2d(64, 32, 3, stride=1)),
             nn.ReLU(),
             Flatten(),
-            init_(nn.Linear(32 * 7 * 7, 2)),
-            nn.Softmax(dim=-1)
+            init_(nn.Linear(32 * 7 * 7, self.output_dim)),
+            nn.Sigmoid()
         )
 
         self.train()
@@ -102,7 +102,7 @@ class generator(nn.Module):
             self.input_height = 84
             self.input_width = 84
             self.input_dim = 62
-            self.output_dim = 1
+            self.output_dim = 4
         elif dataset == 'celebA':
             self.input_height = 64
             self.input_width = 64
@@ -237,3 +237,11 @@ class MLPBase(nn.Module):
         hidden_actor = self.actor(inputs)
 
         return self.critic_linear(hidden_critic), hidden_actor, states
+
+
+class RandomPolicy(object):
+    def __init__(self, env):
+        self.env = env
+
+    def get_action(self):
+        return [self.env.action_space.sample()]
