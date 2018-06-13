@@ -62,8 +62,9 @@ def train_GAN(tranfer_GAN, envs, replay_buffer, args):
             # __________________________________________________#
 
             # Get noise to Feed Generator #
-            noise = Noise(args)
-            fake_image = tranfer_GAN.G(noise)
+            #noise = Noise(args)
+            fake_image = tranfer_GAN.G(real_x.data.cpu())
+            print(fake_image.size())
             fake_y = V(torch.zeros(fake_image.size()[0]).cuda())
 
             D_fake_probs = tranfer_GAN.D(fake_image).squeeze()

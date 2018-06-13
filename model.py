@@ -3,13 +3,13 @@ import utils
 import torch.nn as nn
 import torch.nn.functional as F
 from distributions import Categorical, DiagGaussian
+from torchvision import transforms
 from utils import init, init_normc_
 
 
 class Flatten(nn.Module):
     def forward(self, x):
         return x.view(x.size(0), -1)
-
 
 class Policy(nn.Module):
     def __init__(self, obs_shape, action_space, recurrent_policy):
@@ -132,6 +132,35 @@ class generator(nn.Module):
         return x
 
 
+class AdvGenerator(nn.Module):
+    def __init__(self):
+        super(AdvGenerator, self).__init__()
+        self.input_height = 84
+        self.input_width = 84
+        #self.input_dim = 62
+        self.output_dim = 4
+
+        self.feature_map_sizes = [self.output_dim, 128, 256, 512, 256, 128, 1]
+        self.kernel_sizes = [7, 5, 5, 5, 5, 7]
+
+        self.deconv = nn.Sequential(
+            nn.Conv2d(4, 128, 7),
+            nn.Conv2d(128, 256, 5),
+            nn.Conv2d(256, 512, 5),
+            nn.Conv2d(512, 256, 5),
+            nn.Conv2d(256, 128, 5),
+            nn.Conv2d(128, 1, 7)
+        )
+
+        utils.initialize_weights(self)
+
+    def forward(self, input):
+        input = Resize(input)
+        x = self.deconv(input)
+        return x
+
+
+
 class CNNBase(nn.Module):
     def __init__(self, num_inputs, use_gru):
         super(CNNBase, self).__init__()
@@ -244,3 +273,11 @@ class RandomPolicy(object):
 
     def get_action(self):
         return [self.env.action_space.sample()]
+
+def Resize(x):
+    print(x.data.cpu().numpy())
+    p = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.ToPILImage(),
+        transforms.Scale((64,64))])
+    return p(x)

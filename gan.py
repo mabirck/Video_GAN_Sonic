@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from model import discriminator, generator
+from model import discriminator, generator, AdvGenerator
 # import matplotlib.pyplot as plt
 
 
@@ -8,7 +8,7 @@ class GAN(nn.Module):
 
     def __init__(self, num_inputs):
         super(GAN, self).__init__()
-        self.G = generator()
+        self.G = AdvGenerator()
         self.D = discriminator(num_inputs)
 
     def forward(self, inputs):
