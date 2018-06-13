@@ -71,7 +71,7 @@ def train_GAN(tranfer_GAN, envs, replay_buffer, args):
             # print(fake_image.size())
             fake_y = V(torch.zeros(fake_image.size()[0]).cuda())
 
-            last_fake = real_x
+            last_fake = real_x.data.clone()
             last_fake[:,-1:,:,:] = fake_image
 
             D_fake_probs = tranfer_GAN.D(last_fake).squeeze()
