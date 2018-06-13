@@ -61,10 +61,9 @@ class ReplayMemory(object):
 
     def append(self, states):
         # Normalize to images [-1, 1]
-        states = normalize_frames(states)
 
         assert len(self.samples) <= self.max_size
-        new_samples = [Sample(state) for state in states]
+        new_samples = [Sample(normalize_frames(state)) for state in states]
 
         for new_sample in new_samples:
             if len(self.samples) == self.max_size:
