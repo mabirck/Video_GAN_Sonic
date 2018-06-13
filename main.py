@@ -63,11 +63,14 @@ def train_GAN(tranfer_GAN, envs, replay_buffer, args):
 
             # Get noise to Feed Generator #
             #noise = Noise(args)
-            fake_image = tranfer_GAN.G(real_x.data.cpu())
-            print(fake_image.size())
+            fake_image = tranfer_GAN.G(real_x)
+            # print(fake_image.size())
             fake_y = V(torch.zeros(fake_image.size()[0]).cuda())
 
-            D_fake_probs = tranfer_GAN.D(fake_image).squeeze()
+            last_fake = real_x
+            last_fake[:,-1:,:,:] = fake_image
+
+            D_fake_probs = tranfer_GAN.D(last_fake).squeeze()
             D_fake_loss = criterion(D_fake_probs, fake_y)
 
             # Back propagation
@@ -78,10 +81,15 @@ def train_GAN(tranfer_GAN, envs, replay_buffer, args):
             # _________________________________________________#
 
             # Train generator
-            noise = Noise(args)
-            fake_image = tranfer_GAN.G(noise)
+            #noise = Noise(args)
+            new_real_x = V(ToTensor(replay_buffer.sample(args.batch_size))).squeeze() # labels
+            new_real_y = V(torch.ones(real_x.size()[0]).cuda())
+            fake_image = tranfer_GAN.G(new_real_x)
 
-            D_fake_probs = tranfer_GAN.D(fake_image)
+            last_fake = real_x
+            last_fake[:,-1:,:,:] = fake_image
+
+            D_fake_probs = tranfer_GAN.D(last_fake)
             G_loss = criterion(D_fake_probs, real_y)
 
             # Back propagation

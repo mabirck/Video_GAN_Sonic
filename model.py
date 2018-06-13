@@ -1,5 +1,6 @@
 import torch
 import utils
+import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 from distributions import Categorical, DiagGaussian
@@ -143,21 +144,31 @@ class AdvGenerator(nn.Module):
         self.feature_map_sizes = [self.output_dim, 128, 256, 512, 256, 128, 1]
         self.kernel_sizes = [7, 5, 5, 5, 5, 7]
 
-        self.deconv = nn.Sequential(
-            nn.Conv2d(4, 128, 7),
-            nn.Conv2d(128, 256, 5),
-            nn.Conv2d(256, 512, 5),
-            nn.Conv2d(512, 256, 5),
-            nn.Conv2d(256, 128, 5),
-            nn.Conv2d(128, 1, 7)
-        )
+        self.Conv1 = nn.Conv2d(4, 128, kernel_size=7, padding=3)
+        self.Conv2 = nn.Conv2d(128, 256, kernel_size=5, padding=2)
+        self.Conv3 = nn.Conv2d(256, 512, kernel_size=5, padding=2)
+        self.Conv4 = nn.Conv2d(512, 256, kernel_size=5, padding=2)
+        self.Conv5 = nn.Conv2d(256, 128, 5, padding=2)
+        self.Conv6 = nn.Conv2d(128, 1, 7, padding=3)
+
 
         utils.initialize_weights(self)
 
     def forward(self, input):
-        input = Resize(input)
-        x = self.deconv(input)
-        return x
+        input = Downsample(input)
+        x = self.Conv1(input)
+        # print(x.size(),'conv1')
+        x = self.Conv2(x)
+        # print(x.size(),'conv2')
+        x = self.Conv3(x)
+        # print(x.size(),'conv3')
+        x = self.Conv4(x)
+        # print(x.size(),'conv4')
+        x = self.Conv5(x)
+        # print(x.size(),'conv5')
+        x = self.Conv6(x)
+        # print(x.size(),'conv5')
+        return Upsample(x)
 
 
 
@@ -274,10 +285,29 @@ class RandomPolicy(object):
     def get_action(self):
         return [self.env.action_space.sample()]
 
-def Resize(x):
-    print(x.data.cpu().numpy())
+def Upsample(x):
     p = transforms.Compose([
-        transforms.ToTensor(),
         transforms.ToPILImage(),
-        transforms.Scale((64,64))])
-    return p(x)
+        transforms.Scale((84,84)),
+        transforms.ToTensor()
+        ])
+    blank = torch.empty(*x.size()[:-2], 84, 84)
+
+    for i in range(len(x)):
+        blank[i] = p(x[i].data.cpu())
+    x = torch.FloatTensor(blank).cuda()
+
+    return x
+
+def Downsample(x):
+    p = transforms.Compose([
+        transforms.ToPILImage(),
+        transforms.Scale((64,64)),
+        transforms.ToTensor()
+        ])
+    blank = torch.empty(*x.size()[:-2], 64, 64)
+
+    for i in range(len(x)):
+        blank[i] = p(x[i].data.cpu())
+    x = torch.FloatTensor(blank).cuda()
+    return x
