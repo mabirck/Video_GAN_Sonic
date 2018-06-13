@@ -67,7 +67,24 @@ class WrapPyTorch(gym.ObservationWrapper):
         return observation
 
 # Plot losses
-def plot_loss(d_losses, g_losses, num_epoch, save=False, save_dir='CelebA_DCGAN_results/', show=False):
+def save_loss(d_losses, g_losses, num_epoch, save=False, save_dir='Sonic_VGAN_results/', show=False):
+
+    path = save_dir
+    #path += "_".join([args.arc, str(args.epochs), args.filter_reg, str(args.phi), 'seed', str(args.seed), 'depth', str(args.depth), args.intra_extra])
+    path+= args.path
+    path = path+'.done.csv' if epoch == args.epochs else path+'.csv'
+
+    assert not(os.path.isfile(path) == True and epoch == 0), "That can't be right. This file should not be here!!!!"
+    fields = [num_epoch, "d_losses", d_losses[-1], "g_losses", g_losses[-1]]
+
+
+    with open(path, 'a+') as f:
+        writer = csv.writer(f)
+        writer.writerow(fields)
+
+
+# Plot losses
+def plot_loss(d_losses, g_losses, num_epoch, save=False, save_dir='Sonic_VGAN_results/', show=False):
     fig, ax = plt.subplots()
     ax.set_xlim(0, 100)
     ax.set_ylim(0, max(np.max(g_losses), np.max(d_losses))*1.1)

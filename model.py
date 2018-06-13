@@ -90,7 +90,8 @@ class discriminator(nn.Module):
         self.train()
 
     def forward(self, inputs):
-        x = self.main(inputs / 255.0)
+        print(inputs)
+        x = self.main(inputs)
         return x
 
 class generator(nn.Module):
@@ -156,17 +157,17 @@ class AdvGenerator(nn.Module):
 
     def forward(self, input):
         input = Downsample(input)
-        x = self.Conv1(input)
+        x = F.relu(self.Conv1(input))
         # print(x.size(),'conv1')
-        x = self.Conv2(x)
+        x = F.relu(self.Conv2(x))
         # print(x.size(),'conv2')
-        x = self.Conv3(x)
+        x = F.relu(self.Conv3(x))
         # print(x.size(),'conv3')
-        x = self.Conv4(x)
+        x = F.relu(self.Conv4(x))
         # print(x.size(),'conv4')
-        x = self.Conv5(x)
+        x = F.relu(self.Conv5(x))
         # print(x.size(),'conv5')
-        x = self.Conv6(x)
+        x = F.tanh(self.Conv6(x))
         # print(x.size(),'conv5')
         return Upsample(x)
 

@@ -60,6 +60,9 @@ class ReplayMemory(object):
         print('%d frames burned into the memory.' % i)
 
     def append(self, states):
+        # Normalize to images [-1, 1]
+        states = normalize_frames(states)
+
         assert len(self.samples) <= self.max_size
         new_samples = [Sample(state) for state in states]
 
@@ -93,3 +96,26 @@ def samples_to_tensors(samples):
     states = torch.from_numpy(states).cuda()
 
     return states
+
+def normalize_frames(frames):
+    """
+    Convert frames from int8 [0, 255] to float32 [-1, 1].
+    @param frames: A numpy array. The frames to be converted.
+    @return: The normalized frames.
+    """
+    new_frames = frames.astype(np.float32)
+    new_frames /= (255 / 2)
+    new_frames -= 1
+
+    return new_frames
+
+def denormalize_frames(frames):
+    """
+    Performs the inverse operation of normalize_frames.
+    @param frames: A numpy array. The frames to be converted.
+    @return: The denormalized frames.
+    """
+    new_frames = frames + 1
+    new_frames *= (255 / 2)
+    # noinspection PyUnresolvedReferences
+    new_frames = new_frames.astype(np.uint8)

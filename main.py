@@ -46,6 +46,10 @@ def train_GAN(tranfer_GAN, envs, replay_buffer, args):
         D_losses = []
         G_losses = []
 
+        # Save model Each N Epochs
+        if epoch % 10:
+            torch.save(tranfer_GAN, './models/sonic_VGAN_epoch_'+str(epoch)+'.pt')
+
         for step in range(args.gan_num_steps):
             # Feed Memory Replay with Real Sonic Images #
             envs.render()
