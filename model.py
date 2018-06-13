@@ -90,7 +90,6 @@ class discriminator(nn.Module):
         self.train()
 
     def forward(self, inputs):
-        print(inputs)
         x = self.main(inputs)
         return x
 

@@ -3,7 +3,7 @@ from gan import GAN
 from arguments import get_args
 from sonic_util import make_env
 from torch.autograd import Variable as V
-from utils import plot_loss, plot_result
+from utils import plot_loss, plot_result, save_loss
 from replay_memory import ReplayMemory, samples_to_tensors as ToTensor
 from baselines.common.vec_env.dummy_vec_env import DummyVecEnv
 from baselines.common.vec_env.subproc_vec_env import SubprocVecEnv
@@ -117,10 +117,7 @@ def train_GAN(tranfer_GAN, envs, replay_buffer, args):
         D_avg_losses.append(D_avg_loss)
         G_avg_losses.append(G_avg_loss)
 
-        plot_loss(D_avg_losses, G_avg_losses, epoch, save=True)
-
-        # Show result for fixed noise
-        plot_result(tranfer_GAN.G, fixed_noise, epoch, save=True, fig_size=(5, 5))
+        save_loss(D_avg_losses, G_avg_losses, epoch, save=True)
 
 def build_envs(args):
     envs = [make_env]

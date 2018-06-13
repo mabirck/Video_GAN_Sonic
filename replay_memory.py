@@ -50,7 +50,7 @@ class ReplayMemory(object):
             action = policy.get_action()
             state, reward, done, _ = env.step(action)
             self.append(state)
-            print(done)
+            #print(done)
             if True in done:
                 state = env.reset()
 
