@@ -117,4 +117,5 @@ def denormalize_frames(frames):
     new_frames = frames + 1
     new_frames *= (255 / 2)
     # noinspection PyUnresolvedReferences
-    new_frames = new_frames.astype(np.uint8)
+    #new_frames = new_frames.astype(np.uint8)
+    return new_frames

@@ -38,6 +38,7 @@ def init_normc_(weight, gain=1):
 
 def initialize_weights(net):
     for m in net.modules():
+        print(m)
         if isinstance(m, nn.Conv2d):
             m.weight.data.normal_(0, 0.02)
             m.bias.data.zero_()

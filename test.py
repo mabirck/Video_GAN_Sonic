@@ -1,8 +1,10 @@
 import torch
+import numpy as np
 from gan import GAN
 from arguments import get_args
 from sonic_util import make_env
 from torch.autograd import Variable as V
+from replay_memory import denormalize_frames
 from replay_memory import samples_to_tensors as ToTensor
 from baselines.common.vec_env.dummy_vec_env import DummyVecEnv
 from baselines.common.vec_env.subproc_vec_env import SubprocVecEnv
@@ -12,22 +14,25 @@ def test_GAN(transfer_GAN, envs, args):
 
     # Reset Env Before Start
     obs = envs.reset()
-    for img in obs[0]:
-        print(img.shape)
-        plt.imshow(img)
-        plt.show()
+    # for img in obs[0]:
+    #     print(img.shape)
+    #     plt.imshow(img)
+    #     plt.show()
 
     print(torch.load("model.pt"))
     transfer_GAN = torch.load("model.pt")
 
     for steps in range(60):
         print(steps)
+        actions = envs.action_space.sample()
+        obs, rewards, dones, info = envs.step([actions])
         obs = V(torch.FloatTensor(obs))
         fake_image = transfer_GAN.G(obs)
-        print(fake_image.squeeze().data.cpu().numpy().shape)
-        plt.imshow(fake_image.squeeze().data.cpu().numpy())
+        image = denormalize_frames(fake_image.squeeze().data.cpu().numpy())
+        print(image.shape)
+        plt.imshow(image)
         plt.show()
-        obs[:,-1:,:,:] = fake_image
+        #obs[:,-1:,:,:] = fake_image
 
 
 def build_envs(args):

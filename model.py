@@ -144,32 +144,38 @@ class AdvGenerator(nn.Module):
         self.feature_map_sizes = [self.output_dim, 128, 256, 512, 256, 128, 1]
         self.kernel_sizes = [7, 5, 5, 5, 5, 7]
 
-        self.Conv1 = nn.Conv2d(4, 128, kernel_size=7, padding=3)
-        self.Conv2 = nn.Conv2d(128, 256, kernel_size=5, padding=2)
-        self.Conv3 = nn.Conv2d(256, 512, kernel_size=5, padding=2)
-        self.Conv4 = nn.Conv2d(512, 256, kernel_size=5, padding=2)
-        self.Conv5 = nn.Conv2d(256, 128, 5, padding=2)
-        self.Conv6 = nn.Conv2d(128, 1, 7, padding=3)
-
+        self.deconv = nn.Sequential(
+            nn.Conv2d(4, 128, kernel_size=7, padding=3),
+            nn.BatchNorm2d(128),
+            nn.LeakyReLU(),
+            nn.Dropout(p=0.5),
+            nn.Conv2d(128, 256, kernel_size=5, padding=2),
+            nn.BatchNorm2d(256),
+            nn.LeakyReLU(),
+            nn.Dropout(p=0.5),
+            nn.Conv2d(256, 512, kernel_size=5, padding=2),
+            nn.BatchNorm2d(512),
+            nn.LeakyReLU(),
+            nn.Dropout(p=0.5),
+            nn.Conv2d(512, 256, kernel_size=5, padding=2),
+            nn.BatchNorm2d(256),
+            nn.LeakyReLU(),
+            nn.Dropout(p=0.5),
+            nn.Conv2d(256, 128, 5, padding=2),
+            nn.BatchNorm2d(128),
+            nn.LeakyReLU(),
+            nn.Dropout(p=0.5),
+            nn.Conv2d(128, 1, 7, padding=3),
+            nn.BatchNorm2d(1),
+            nn.Tanh()
+        )
 
         utils.initialize_weights(self)
 
     def forward(self, input):
         input = Downsample(input)
-        x = F.relu(self.Conv1(input))
-        # print(x.size(),'conv1')
-        x = F.relu(self.Conv2(x))
-        # print(x.size(),'conv2')
-        x = F.relu(self.Conv3(x))
-        # print(x.size(),'conv3')
-        x = F.relu(self.Conv4(x))
-        # print(x.size(),'conv4')
-        x = F.relu(self.Conv5(x))
-        # print(x.size(),'conv5')
-        x = F.tanh(self.Conv6(x))
-        # print(x.size(),'conv5')
+        x = self.deconv(input)
         return Upsample(x)
-
 
 
 class CNNBase(nn.Module):
