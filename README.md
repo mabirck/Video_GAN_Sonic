@@ -5,3 +5,4 @@
 * https://github.com/ikostrikov/pytorch-a2c-ppo-acktr
 * https://github.com/znxlwm/pytorch-generative-model-collections
 * https://github.com/hengyuan-hu/rainbow
+* https://github.com/dyelax/Adversarial_Video_Generation

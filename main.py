@@ -3,16 +3,12 @@ from gan import GAN
 from arguments import get_args
 from sonic_util import make_env
 from torch.autograd import Variable as V
-from utils import plot_loss, plot_result, save_loss
+from utils import plot_loss, plot_result, save_loss, lp_loss
 from replay_memory import ReplayMemory, samples_to_tensors as ToTensor
 from baselines.common.vec_env.dummy_vec_env import DummyVecEnv
 from baselines.common.vec_env.subproc_vec_env import SubprocVecEnv
 
 betas = (0.5, 0.999)
-
-def Tensor(x):
-    return torch.FloatTensor(x)
-
 
 def Noise(args):
     # fixed noise
@@ -47,7 +43,7 @@ def train_GAN(tranfer_GAN, envs, replay_buffer, args):
         G_losses = []
 
         # Save model Each N Epochs
-        if epoch % 10:
+        if (epoch % 10) == 0:
             torch.save(tranfer_GAN, './models/sonic_VGAN_epoch_'+str(epoch)+'.pt')
 
         for step in range(args.gan_num_steps):
@@ -61,14 +57,13 @@ def train_GAN(tranfer_GAN, envs, replay_buffer, args):
             # Train discriminator with real data #
             real_x = V(ToTensor(replay_buffer.sample(args.batch_size))).squeeze() # labels
             real_y = V(torch.ones(real_x.size()[0]).cuda())
+
             D_probs = tranfer_GAN.D(real_x)
             D_real_loss = criterion(D_probs, real_y)
             # __________________________________________________#
 
             # Get noise to Feed Generator #
-            #noise = Noise(args)
             fake_image = tranfer_GAN.G(real_x)
-            # print(fake_image.size())
             fake_y = V(torch.zeros(fake_image.size()[0]).cuda())
 
             last_fake = real_x.data.clone()
@@ -86,9 +81,12 @@ def train_GAN(tranfer_GAN, envs, replay_buffer, args):
 
             # Train generator
             #noise = Noise(args)
-            new_real_x = V(ToTensor(replay_buffer.sample(args.batch_size))).squeeze() # labels
-            new_real_y = V(torch.ones(real_x.size()[0]).cuda())
-            fake_image = tranfer_GAN.G(new_real_x)
+            real_x = V(ToTensor(replay_buffer.sample(args.batch_size))).squeeze() # labels
+            real_y = V(torch.ones(real_x.size()[0]).cuda())
+            fake_image = tranfer_GAN.G(real_x)
+
+            # Get Lp loss from Fake and Real images:
+            LP_loss = lp_loss(fake_image, real_x[:, -1:,:, :])
 
             last_fake = real_x
             last_fake[:,-1:,:,:] = fake_image
@@ -96,10 +94,14 @@ def train_GAN(tranfer_GAN, envs, replay_buffer, args):
             D_fake_probs = tranfer_GAN.D(last_fake)
             G_loss = criterion(D_fake_probs, real_y)
 
+            # Total loss:
+            T_G_loss = args.lambda_adv * G_loss +  args.lambda_lp * LP_loss
+
             # Back propagation
             tranfer_GAN.D.zero_grad()
             tranfer_GAN.G.zero_grad()
-            G_loss.backward()
+            #G_loss.backward()
+            T_G_loss.backward()
             G_optimizer.step()
 
             # loss values

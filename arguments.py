@@ -10,9 +10,9 @@ def get_args():
     #                     help='num_inputs into the model')
     parser.add_argument('--replay_size', default=int(1e6), type=int,
                         help='Buffer Size to train GAN')
-    parser.add_argument('--gan_num_epochs', type=int, default=100,
+    parser.add_argument('--gan_num_epochs', type=int, default=101,
                         help='Epochs to train GAN')
-    parser.add_argument('--gan_num_steps', type=int, default=int(1e4),
+    parser.add_argument('--gan_num_steps', type=int, default=int(1e3),
                             help='Steps por epoch in GAN')
     parser.add_argument('--noise_inputs', type=int, default=62,
                         help='Noise inputs into generative model')
@@ -28,7 +28,10 @@ def get_args():
                         help='Number of simultaneous emulators')
     parser.add_argument('--no-cuda', action='store_true', default=False,
                         help='disables CUDA training')
-
+    parser.add_argument('--lambda_adv', type=float, default=float(0.05),
+                        help='Scale Adversarial Generator Loss')
+    parser.add_argument('--lambda_lp', type=float, default=float(1.0),
+                        help='Scale prediction loss')
     args = parser.parse_args()
 
     args.cuda = not args.no_cuda and torch.cuda.is_available()

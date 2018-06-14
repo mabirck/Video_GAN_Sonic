@@ -1,5 +1,6 @@
 import os
 import gym
+import csv
 import torch
 import numpy as np
 import torch.nn as nn
@@ -69,12 +70,11 @@ class WrapPyTorch(gym.ObservationWrapper):
 # Plot losses
 def save_loss(d_losses, g_losses, num_epoch, save=False, save_dir='Sonic_VGAN_results/', show=False):
 
-    path = save_dir
+    path = save_dir+'log.txt'
     #path += "_".join([args.arc, str(args.epochs), args.filter_reg, str(args.phi), 'seed', str(args.seed), 'depth', str(args.depth), args.intra_extra])
-    path+= args.path
-    path = path+'.done.csv' if epoch == args.epochs else path+'.csv'
+    #path = path+'.done.csv' if epoch == args.epochs else path+'.csv'
 
-    assert not(os.path.isfile(path) == True and epoch == 0), "That can't be right. This file should not be here!!!!"
+    assert not(os.path.isfile(path) == True and num_epoch == 0), "That can't be right. This file should not be here!!!!"
     fields = [num_epoch, "d_losses", d_losses[-1], "g_losses", g_losses[-1]]
 
 
@@ -146,3 +146,13 @@ def plot_result(generator, noise, num_epoch, save=False, save_dir='CelebA_DCGAN_
 def denorm(x):
     out = (x + 1) / 2
     return out.clamp(0, 1)
+
+def lp_loss(fake_frames, real_frames, l_num=2):
+    """
+    Calculates the sum of lp losses between the predicted and ground truth frames.
+    @param gen_frames: The predicted frames at each scale.
+    @param gt_frames: The ground truth frames at each scale
+    @param l_num: 1 or 2 for l1 and l2 loss, respectively).
+    @return: The lp loss.
+    """
+    return torch.sum(torch.abs(fake_frames - real_frames)**l_num)
