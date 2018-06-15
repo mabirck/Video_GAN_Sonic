@@ -88,7 +88,7 @@ def train_GAN(tranfer_GAN, envs, replay_buffer, args):
             # Get Lp loss from Fake and Real images:
             LP_loss = lp_loss(fake_image, real_x[:, -1:,:, :])
 
-            last_fake = real_x
+            last_fake = real_x.data.clone()
             last_fake[:,-1:,:,:] = fake_image
 
             D_fake_probs = tranfer_GAN.D(last_fake)

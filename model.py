@@ -173,9 +173,9 @@ class AdvGenerator(nn.Module):
         utils.initialize_weights(self)
 
     def forward(self, input):
-        input = Downsample(input)
-        x = self.deconv(input)
-        return Upsample(x)
+        #input = Downsample(input)
+        return self.deconv(input)
+        #return Upsample(x)
 
 
 class CNNBase(nn.Module):
