@@ -2,6 +2,7 @@ import torch
 from gan import GAN
 from arguments import get_args
 from sonic_util import make_env
+from learning_rate import gammaLR
 from torch.autograd import Variable as V
 from utils import plot_loss, plot_result, save_loss, lp_loss
 from replay_memory import ReplayMemory, samples_to_tensors as ToTensor
@@ -26,8 +27,15 @@ def train_GAN(tranfer_GAN, envs, replay_buffer, args):
     criterion = torch.nn.BCELoss()
 
     # Optimizers
-    G_optimizer = torch.optim.Adam(tranfer_GAN.G.parameters(), lr=args.gan_learning_rate, betas=betas)
-    D_optimizer = torch.optim.Adam(tranfer_GAN.D.parameters(), lr=args.gan_learning_rate, betas=betas)
+    G_optimizer = torch.optim.Adam(tranfer_GAN.G.parameters(), lr=args.G_lr[0], betas=betas)
+    D_optimizer = torch.optim.Adam(tranfer_GAN.D.parameters(), lr=args.D_lr, betas=betas)
+
+
+    gamma_decay = (args.G_lr[0] - args.G_lr[1]) / (args.gan_num_epochs * args.gan_num_steps)
+    print(gamma_decay)
+
+    # LR Scheduler
+    lr_scheduler_G = gammaLR(G_optimizer, gamma=gamma_decay)
 
     # Training GAN
     D_avg_losses = []
@@ -103,6 +111,7 @@ def train_GAN(tranfer_GAN, envs, replay_buffer, args):
             #G_loss.backward()
             T_G_loss.backward()
             G_optimizer.step()
+            lr_scheduler_G.step()
 
             # loss values
             D_losses.append(D_loss.data[0])

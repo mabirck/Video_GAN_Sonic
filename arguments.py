@@ -20,8 +20,10 @@ def get_args():
                         help='Epochs to train GAN')
     parser.add_argument('--batch_size', type=int, default=32,
                         help='Batch Size to the model')
-    parser.add_argument('--gan_learning_rate', type=float, default=float(2e-2),
-                        help='Learning Rate to train Gan')
+    parser.add_argument('--G_lr', type=list, default=[0.04, 0.005],
+                        help='Learning Rate to train Generator')
+    parser.add_argument('--D_lr', type=float, default=0.02,
+                        help='Learning Rate to train Generator')
     parser.add_argument('--num_stack', type=int, default=4,
                         help='Number of frames being stacked')
     parser.add_argument('--num_processes', type=int, default=1,
