@@ -148,7 +148,7 @@ def main():
     replay_buffer = ReplayMemory(args.replay_size)
     envs, args = build_envs(args)
 
-    transfer_GAN = GAN(args.num_stack)
+    transfer_GAN = GAN(args.num_stack, args)
 
     if args.cuda:
         transfer_GAN.cuda()

@@ -175,12 +175,12 @@ class AdvGenerator(nn.Module):
     def forward(self, input):
         input = Downsample(input)
         x = self.deconv(input)
-        #return Upsample(x)
-        return x
+        return Upsample(x)
 
 class AdvDiscriminator(nn.Module):
-    def __init__(self):
+    def __init__(self, args):
         super(AdvDiscriminator, self).__init__()
+        self.args = args
         self.input_height = 84
         self.input_width = 84
         #self.input_dim = 62
@@ -204,7 +204,7 @@ class AdvDiscriminator(nn.Module):
             nn.LeakyReLU(),
             nn.Dropout(p=0.5),
             nn.Conv2d(512, 128, kernel_size=5),
-            nn.BatchNorm2d(256),
+            nn.BatchNorm2d(128),
             nn.LeakyReLU(),
             nn.Dropout(p=0.5),
         )
@@ -226,8 +226,10 @@ class AdvDiscriminator(nn.Module):
         utils.initialize_weights(self)
 
 
-    def forward(input):
+    def forward(self, input):
+        input = Downsample(input)
         x = self.conv(input)
+        x = x.view(self.args.batch_size, -1)
         return self.sequential(x)
 
 
