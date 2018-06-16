@@ -6,8 +6,8 @@ from model import discriminator, generator, AdvGenerator, AdvDiscriminator
 
 class GAN(nn.Module):
 
-    def __init__(self, num_inputs):
-        super(GAN, self, args).__init__()
+    def __init__(self, num_inputs, args):
+        super(GAN, self).__init__()
         self.G = AdvGenerator()
         self.D = AdvDiscriminator(args)
 

@@ -5,7 +5,7 @@ Environments and wrappers for Sonic training.
 import gym
 import numpy as np
 
-from baselines.common.atari_wrappers import WarpFrame, FrameStack
+from baselines.common.atari_wrappers import FrameStack
 from utils import WrapPyTorch
 
 try:
@@ -25,7 +25,7 @@ def make_env(env_id="SonicTheHedgehog-Genesis,GreenHillZone.Act1", stack=True, s
 
     if scale_rew:
         env = RewardScaler(env)
-    env = WarpFrame(env)
+    env = WarpFrame(env, (32, 32))
     if stack:
         env = FrameStack(env, 4)
 
@@ -90,3 +90,17 @@ class AllowBacktracking(gym.Wrapper):
         rew = max(0, self._cur_x - self._max_x)
         self._max_x = max(self._max_x, self._cur_x)
         return obs, rew, done, info
+
+class WarpFrame(gym.ObservationWrapper):
+    def __init__(self, env, size=(84, 84)):
+        """Warp frames to 84x84 as done in the Nature paper and later work."""
+        gym.ObservationWrapper.__init__(self, env)
+        self.width = size[0]
+        self.height = size[1]
+        self.observation_space = spaces.Box(low=0, high=255,
+            shape=(self.height, self.width, 1), dtype=np.uint8)
+
+    def observation(self, frame):
+        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+        frame = cv2.resize(frame, (self.width, self.height), interpolation=cv2.INTER_AREA)
+        return frame[:, :, None]
