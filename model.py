@@ -346,4 +346,4 @@ class RandomPolicy(object):
         self.env = env
 
     def get_action(self):
-        return [self.env.action_space.sample()]
+        return self.env.action_space.sample()

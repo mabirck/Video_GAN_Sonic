@@ -1,12 +1,12 @@
 import torch
 from gan import GAN
 from arguments import get_args
-from sonic_util import make_env
+from sonic_util import make_env_train
 from learning_rate import gammaLR
 from torch.autograd import Variable as V
 from utils import plot_loss, plot_result, save_loss, lp_loss, getListOfGames
 from replay_memory import ReplayMemory, samples_to_tensors as ToTensor
-from subproc_vec_env import SubprocVecEnv
+from baselines.common.vec_env.subproc_vec_env import SubprocVecEnv
 
 
 def Noise(args):
@@ -51,9 +51,9 @@ def train_GAN(tranfer_GAN, envs, replay_buffer, args):
 
         for step in range(args.gan_num_steps):
             # Feed Memory Replay with Real Sonic Images #
-            envs.render()
-            actions = envs.action_space.sample()
-            obs, rewards, dones, info = envs.step([actions])
+            #envs.render()
+            actions = [envs.action_space.sample()] * envs.num_envs
+            obs, rewards, dones, info = envs.step(actions)
             replay_buffer.append(obs)
             # __________________________________________________#
 
@@ -124,7 +124,11 @@ def train_GAN(tranfer_GAN, envs, replay_buffer, args):
         save_loss(D_avg_losses, G_avg_losses, epoch, save=True)
 
 def build_envs(args):
-    envs = [make_env for _ in range(len(getListOfGames("train")[:5]))]
+    names = getListOfGames("train")
+
+    envs = [make_env_train(names[i], args.seed, i, None)
+            for i in range(len(names))]
+
     args.num_processes = len(envs)
 
     envs = SubprocVecEnv(envs)
@@ -142,7 +146,7 @@ def main():
 
     if args.cuda:
         transfer_GAN.cuda()
-    print(transfer_GAN)
+    #print(transfer_GAN)
 
     train_GAN(transfer_GAN, envs, replay_buffer, args)
 

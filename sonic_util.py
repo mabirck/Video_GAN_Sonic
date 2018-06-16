@@ -16,13 +16,13 @@ except ImportError:
     print("FAILED TO IMPORT retro_contest.local")
 
 
-def make_env(index=None, stack=True, scale_rew=True):
+def make_env(env_id, stack=True, scale_rew=True):
     """
     Create an environment with some standard wrappers.
     """
-    games = getListOfGames("train")
 
-    game, state = games[index].split(',')
+    game, state = env_id.split(',')
+    print("MAKING",game, "STATE", state)
 
     env = make(game=game, state=state)
     env = SonicDiscretizer(env)
@@ -108,3 +108,13 @@ class WarpFrame(gym.ObservationWrapper):
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
         frame = cv2.resize(frame, (self.width, self.height), interpolation=cv2.INTER_AREA)
         return frame[:, :, None]
+
+def make_env_train(env_id, seed, rank, log_dir):
+    def _thunk():
+        env = make_env(env_id=env_id)
+
+        env.seed(seed+rank)
+        # if log_dir is not None:
+        #     env = bench.Monitor(env, os.path.join(log_dir, str(rank)))
+        return env
+    return _thunk

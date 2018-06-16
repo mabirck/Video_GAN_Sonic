@@ -47,10 +47,10 @@ class ReplayMemory(object):
 
         env.reset()
         while i < num_steps:
-            action = policy.get_action()
-            state, reward, done, _ = env.step(action)
+            #env.render()
+            actions = [policy.get_action()] * env.num_envs
+            state, reward, done, _ = env.step(actions)
             self.append(state)
-            #print(done)
             if True in done:
                 state = env.reset()
 
@@ -91,7 +91,6 @@ def samples_to_tensors(samples):
 
     for i, s in enumerate(samples):
         states[i] = s.state
-    print(states.shape)
     states = torch.from_numpy(states).cuda()
 
     return states

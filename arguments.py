@@ -34,6 +34,8 @@ def get_args():
                         help='Scale Adversarial Generator Loss')
     parser.add_argument('--lambda_lp', type=float, default=float(1.0),
                         help='Scale prediction loss')
+    parser.add_argument('--seed', type=int, default=42,
+                        help='Seed')
     args = parser.parse_args()
 
     args.cuda = not args.no_cuda and torch.cuda.is_available()
