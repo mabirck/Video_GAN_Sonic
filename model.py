@@ -173,9 +173,62 @@ class AdvGenerator(nn.Module):
         utils.initialize_weights(self)
 
     def forward(self, input):
-        #input = Downsample(input)
-        return self.deconv(input)
+        input = Downsample(input)
+        x = self.deconv(input)
         #return Upsample(x)
+        return x
+
+class AdvDiscriminator(nn.Module):
+    def __init__(self):
+        super(AdvDiscriminator, self).__init__()
+        self.input_height = 84
+        self.input_width = 84
+        #self.input_dim = 62
+        self.output_dim = 4
+
+        self.feature_map_sizes = [self.output_dim, 128, 256, 512, 128]
+        self.kernel_sizes = [7, 7, 5, 5]
+        self.fc_sizes = [1024, 512]
+
+        self.conv = nn.Sequential(
+            nn.Conv2d(4, 128, kernel_size=7),
+            nn.BatchNorm2d(128),
+            nn.LeakyReLU(),
+            nn.Dropout(p=0.5),
+            nn.Conv2d(128, 256, kernel_size=7),
+            nn.BatchNorm2d(256),
+            nn.LeakyReLU(),
+            nn.Dropout(p=0.5),
+            nn.Conv2d(256, 512, kernel_size=5),
+            nn.BatchNorm2d(512),
+            nn.LeakyReLU(),
+            nn.Dropout(p=0.5),
+            nn.Conv2d(512, 128, kernel_size=5),
+            nn.BatchNorm2d(256),
+            nn.LeakyReLU(),
+            nn.Dropout(p=0.5),
+        )
+
+        self.sequential = nn.Sequential(
+            nn.Linear(64 * 64 * 128, 1024),
+            nn.BatchNorm1d(1024),
+            nn.LeakyReLU(),
+            nn.Dropout(p=0.5),
+            nn.Linear(1024, 512),
+            nn.BatchNorm1d(512),
+            nn.LeakyReLU(),
+            nn.Dropout(p=0.5),
+            nn.Linear(512, 1),
+            nn.BatchNorm1d(1),
+            nn.Sigmoid()
+        )
+
+        utils.initialize_weights(self)
+
+
+    def forward(input):
+        x = self.conv(input)
+        return self.sequential(x)
 
 
 class CNNBase(nn.Module):
@@ -308,10 +361,10 @@ def Upsample(x):
 def Downsample(x):
     p = transforms.Compose([
         transforms.ToPILImage(),
-        transforms.Scale((64,64)),
+        transforms.Scale((32,32)),
         transforms.ToTensor()
         ])
-    blank = torch.empty(*x.size()[:-2], 64, 64)
+    blank = torch.empty(*x.size()[:-2], 32, 32)
 
     for i in range(len(x)):
         blank[i] = p(x[i].data.cpu())
