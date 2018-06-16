@@ -171,6 +171,7 @@ class AdvGenerator(nn.Module):
 
     def forward(self, input):
         x = self.deconv(input)
+        #print(x.size(), "THIS IS MY GENERATOR")
         return x
 
 class AdvDiscriminator(nn.Module):
@@ -190,27 +191,27 @@ class AdvDiscriminator(nn.Module):
             nn.Conv2d(4, 128, kernel_size=7),
             nn.BatchNorm2d(128),
             nn.LeakyReLU(),
-            nn.MaxPool2d(2),
+            #nn.MaxPool2d(2),
             nn.Dropout(p=0.5),
             nn.Conv2d(128, 256, kernel_size=7),
             nn.BatchNorm2d(256),
             nn.LeakyReLU(),
-            nn.MaxPool2d(2),
+            #nn.MaxPool2d(2),
             nn.Dropout(p=0.5),
             nn.Conv2d(256, 512, kernel_size=5),
             nn.BatchNorm2d(512),
             nn.LeakyReLU(),
-            nn.MaxPool2d(2),
+            #nn.MaxPool2d(2),
             nn.Dropout(p=0.5),
             nn.Conv2d(512, 128, kernel_size=5),
             nn.BatchNorm2d(128),
             nn.LeakyReLU(),
-            nn.MaxPool2d(2),
+            #nn.MaxPool2d(2),
             nn.Dropout(p=0.5),
         )
 
         self.sequential = nn.Sequential(
-            nn.Linear(64 * 64 * 128, 1024),
+            nn.Linear(12 * 12 * 128, 1024),
             nn.BatchNorm1d(1024),
             nn.LeakyReLU(),
             nn.Dropout(p=0.5),
@@ -227,7 +228,9 @@ class AdvDiscriminator(nn.Module):
 
 
     def forward(self, input):
+        #print(input.size(), "DISCRIMINATOR INPUT")
         x = self.conv(input)
+        #print(x.size(), "DISCRIMINATOR CONV")
         x = x.view(self.args.batch_size, -1)
         return self.sequential(x)
 
