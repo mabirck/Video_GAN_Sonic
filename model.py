@@ -173,9 +173,8 @@ class AdvGenerator(nn.Module):
         utils.initialize_weights(self)
 
     def forward(self, input):
-        input = Downsample(input)
         x = self.deconv(input)
-        return Upsample(x)
+        return x
 
 class AdvDiscriminator(nn.Module):
     def __init__(self, args):
@@ -227,7 +226,6 @@ class AdvDiscriminator(nn.Module):
 
 
     def forward(self, input):
-        input = Downsample(input)
         x = self.conv(input)
         x = x.view(self.args.batch_size, -1)
         return self.sequential(x)
@@ -345,30 +343,3 @@ class RandomPolicy(object):
 
     def get_action(self):
         return [self.env.action_space.sample()]
-
-def Upsample(x):
-    p = transforms.Compose([
-        transforms.ToPILImage(),
-        transforms.Scale((84,84)),
-        transforms.ToTensor()
-        ])
-    blank = torch.empty(*x.size()[:-2], 84, 84)
-
-    for i in range(len(x)):
-        blank[i] = p(x[i].data.cpu())
-    x = torch.FloatTensor(blank).cuda()
-
-    return x
-
-def Downsample(x):
-    p = transforms.Compose([
-        transforms.ToPILImage(),
-        transforms.Scale((32,32)),
-        transforms.ToTensor()
-        ])
-    blank = torch.empty(*x.size()[:-2], 32, 32)
-
-    for i in range(len(x)):
-        blank[i] = p(x[i].data.cpu())
-    x = torch.FloatTensor(blank).cuda()
-    return x
