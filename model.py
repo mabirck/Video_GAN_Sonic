@@ -1,11 +1,8 @@
 import torch
 import utils
-import numpy as np
 import torch.nn as nn
-import torch.nn.functional as F
-from distributions import Categorical, DiagGaussian
-from torchvision import transforms
 from utils import init, init_normc_
+from distributions import Categorical, DiagGaussian
 
 
 class Flatten(nn.Module):
@@ -193,18 +190,22 @@ class AdvDiscriminator(nn.Module):
             nn.Conv2d(4, 128, kernel_size=7),
             nn.BatchNorm2d(128),
             nn.LeakyReLU(),
+            nn.MaxPool2d(2),
             nn.Dropout(p=0.5),
             nn.Conv2d(128, 256, kernel_size=7),
             nn.BatchNorm2d(256),
             nn.LeakyReLU(),
+            nn.MaxPool2d(2),
             nn.Dropout(p=0.5),
             nn.Conv2d(256, 512, kernel_size=5),
             nn.BatchNorm2d(512),
             nn.LeakyReLU(),
+            nn.MaxPool2d(2),
             nn.Dropout(p=0.5),
             nn.Conv2d(512, 128, kernel_size=5),
             nn.BatchNorm2d(128),
             nn.LeakyReLU(),
+            nn.MaxPool2d(2),
             nn.Dropout(p=0.5),
         )
 

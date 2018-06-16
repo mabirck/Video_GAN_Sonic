@@ -3,7 +3,9 @@ Environments and wrappers for Sonic training.
 """
 
 import gym
+import cv2
 import numpy as np
+from gym import spaces
 
 from baselines.common.atari_wrappers import FrameStack
 from utils import WrapPyTorch
