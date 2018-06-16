@@ -91,7 +91,7 @@ def samples_to_tensors(samples):
 
     for i, s in enumerate(samples):
         states[i] = s.state
-
+    print(states.shape)
     states = torch.from_numpy(states).cuda()
 
     return states

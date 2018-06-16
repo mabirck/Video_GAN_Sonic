@@ -53,7 +53,7 @@ class SubprocVecEnv(VecEnv):
 
         self.remotes[0].send(('get_spaces', None))
         self.observation_space, self.action_space = self.remotes[0].recv()
-        VecEnv.__init__(self)
+        VecEnv.__init__(self, self.num_envs,self.observation_space, self.action_space)
 
     def step(self, actions):
         self.step_async(actions)

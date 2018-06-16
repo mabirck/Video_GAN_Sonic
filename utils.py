@@ -8,8 +8,6 @@ from torch.autograd import Variable as V
 import matplotlib.pyplot as plt
 from gym.spaces.box import Box
 
-
-
 # Necessary for my KFAC implementation.
 class AddBias(nn.Module):
     def __init__(self, bias):
@@ -157,3 +155,19 @@ def lp_loss(fake_frames, real_frames, l_num=2):
     @return: The lp loss.
     """
     return torch.sum(torch.abs(V(fake_frames) - V(real_frames))**l_num)
+
+def getListOfGames(regime):
+    fileName = "./files/"
+    fileName += "sonic-train.csv" if regime == "train" else "sonic-validation.csv"
+
+    names = list()
+
+    with open(fileName, 'r') as csvfile:
+        spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
+        firstline = True
+        for row in spamreader:
+            if firstline:    #skip first line
+                firstline = False
+                continue
+            names.append(row[0])
+    return names

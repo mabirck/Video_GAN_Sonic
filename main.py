@@ -4,17 +4,14 @@ from arguments import get_args
 from sonic_util import make_env
 from learning_rate import gammaLR
 from torch.autograd import Variable as V
-from utils import plot_loss, plot_result, save_loss, lp_loss
+from utils import plot_loss, plot_result, save_loss, lp_loss, getListOfGames
 from replay_memory import ReplayMemory, samples_to_tensors as ToTensor
 from subproc_vec_env import SubprocVecEnv
 
 
 def Noise(args):
     # fixed noise
-    if args.cuda:
-        noise = V(torch.rand((args.batch_size, *args.noise_inputs)).normal_(0, 0.1), volatile=True)
-    else:
-        noise = V(torch.rand((args.batch_size, args.noise_inputs)), volatile=True)
+    noise = V(torch.rand((args.batch_size, *args.noise_inputs)).normal_(0, 0.1), volatile=True)
     return noise
 
 
@@ -127,13 +124,10 @@ def train_GAN(tranfer_GAN, envs, replay_buffer, args):
         save_loss(D_avg_losses, G_avg_losses, epoch, save=True)
 
 def build_envs(args):
-    envs = [make_env]
+    envs = [make_env for _ in range(len(getListOfGames("train")[:5]))]
     args.num_processes = len(envs)
 
-    if args.num_processes > 1:
-        envs = SubprocVecEnv(envs)
-    else:
-        envs = DummyVecEnv(envs)
+    envs = SubprocVecEnv(envs)
 
     return envs, args
 

@@ -8,7 +8,7 @@ import numpy as np
 from gym import spaces
 
 from baselines.common.atari_wrappers import FrameStack
-from utils import WrapPyTorch
+from utils import WrapPyTorch, getListOfGames
 
 try:
     from retro_contest.local import make
@@ -16,11 +16,13 @@ except ImportError:
     print("FAILED TO IMPORT retro_contest.local")
 
 
-def make_env(env_id="SonicTheHedgehog-Genesis,GreenHillZone.Act1", stack=True, scale_rew=True):
+def make_env(index=None, stack=True, scale_rew=True):
     """
     Create an environment with some standard wrappers.
     """
-    game, state = env_id.split(',')
+    games = getListOfGames("train")
+
+    game, state = games[index].split(',')
 
     env = make(game=game, state=state)
     env = SonicDiscretizer(env)
