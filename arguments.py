@@ -14,13 +14,13 @@ def get_args():
                         help='Epochs to train GAN')
     parser.add_argument('--gan_num_steps', type=int, default=int(5e3),
                             help='Steps por epoch in GAN')
-    parser.add_argument('--noise_inputs', type=int, default=62,
+    parser.add_argument('--noise_inputs', type=list, default=(4, 32, 32),
                         help='Noise inputs into generative model')
-    parser.add_argument('--burn_in_frames', type=int, default=int(100),
+    parser.add_argument('--burn_in_frames', type=int, default=100,
                         help='Epochs to train GAN')
-    parser.add_argument('--batch_size', type=int, default=32,
+    parser.add_argument('--batch_size', type=int, default=8,
                         help='Batch Size to the model')
-    parser.add_argument('--G_lr', type=list, default=[0.04, 0.005],
+    parser.add_argument('--G_lr', type=list, default=[0.00004, 0.00004],
                         help='Learning Rate to train Generator')
     parser.add_argument('--D_lr', type=float, default=0.02,
                         help='Learning Rate to train Generator')

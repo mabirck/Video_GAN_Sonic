@@ -9,12 +9,11 @@ from replay_memory import ReplayMemory, samples_to_tensors as ToTensor
 from baselines.common.vec_env.dummy_vec_env import DummyVecEnv
 from baselines.common.vec_env.subproc_vec_env import SubprocVecEnv
 
-betas = (0.5, 0.999)
 
 def Noise(args):
     # fixed noise
     if args.cuda:
-        noise = V(torch.rand((args.batch_size, args.noise_inputs)).cuda(), volatile=True)
+        noise = V(torch.rand((args.batch_size, *args.noise_inputs)).normal_(0, 0.1), volatile=True)
     else:
         noise = V(torch.rand((args.batch_size, args.noise_inputs)), volatile=True)
     return noise
@@ -27,8 +26,8 @@ def train_GAN(tranfer_GAN, envs, replay_buffer, args):
     criterion = torch.nn.BCELoss()
 
     # Optimizers
-    G_optimizer = torch.optim.Adam(tranfer_GAN.G.parameters(), lr=args.G_lr[0], betas=betas)
-    D_optimizer = torch.optim.Adam(tranfer_GAN.D.parameters(), lr=args.D_lr, betas=betas)
+    G_optimizer = torch.optim.Adam(tranfer_GAN.G.parameters(), lr=args.G_lr[0])
+    D_optimizer = torch.optim.Adam(tranfer_GAN.D.parameters(), lr=args.D_lr)
 
 
     gamma_decay = (args.G_lr[0] - args.G_lr[1]) / (args.gan_num_epochs * args.gan_num_steps)
@@ -65,8 +64,7 @@ def train_GAN(tranfer_GAN, envs, replay_buffer, args):
             # Train discriminator with real data #
             real_x = V(ToTensor(replay_buffer.sample(args.batch_size))).squeeze() # labels
             real_y = V(torch.ones(real_x.size()[0]).cuda())
-
-            D_probs = tranfer_GAN.D(real_x)
+            D_probs = tranfer_GAN.D(real_x + Noise(args).cuda())
             D_real_loss = criterion(D_probs, real_y)
             # __________________________________________________#
 
@@ -98,8 +96,7 @@ def train_GAN(tranfer_GAN, envs, replay_buffer, args):
 
             last_fake = real_x.data.clone()
             last_fake[:,-1:,:,:] = fake_image
-
-            D_fake_probs = tranfer_GAN.D(last_fake)
+            D_fake_probs = tranfer_GAN.D(last_fake + Noise(args).cuda())
             G_loss = criterion(D_fake_probs, real_y)
 
             # Total loss:

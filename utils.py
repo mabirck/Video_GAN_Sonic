@@ -4,7 +4,7 @@ import csv
 import torch
 import numpy as np
 import torch.nn as nn
-from torch.autograd import Variable
+from torch.autograd import Variable as V
 import matplotlib.pyplot as plt
 from gym.spaces.box import Box
 
@@ -111,7 +111,7 @@ def plot_loss(d_losses, g_losses, num_epoch, save=False, save_dir='Sonic_VGAN_re
 def plot_result(generator, noise, num_epoch, save=False, save_dir='CelebA_DCGAN_results/', show=False, fig_size=(5, 5)):
     generator.eval()
 
-    noise = Variable(noise.cuda(), volatile=True)
+    noise = V(noise.cuda(), volatile=True)
     gen_image = generator(noise)
     gen_image = denorm(gen_image)
 
@@ -156,4 +156,4 @@ def lp_loss(fake_frames, real_frames, l_num=2):
     @param l_num: 1 or 2 for l1 and l2 loss, respectively).
     @return: The lp loss.
     """
-    return torch.sum(torch.abs(fake_frames - real_frames)**l_num)
+    return torch.sum(torch.abs(V(fake_frames) - V(real_frames))**l_num)
